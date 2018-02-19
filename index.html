@@ -1,0 +1,130 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FBTCP - Fucking Bitcoin Price</title>
+
+</head>
+
+<body>
+<!--<h1 class="text-center display-4 py-4 font-weight-bold">FUCKING <img class="img-fluid" src="img/bitcoin.png"> PRICE</h1>-->
+<div class="d-flex justify-content-center">
+<img class="img-fluid" src="img/bitcoin.png">
+</div>
+
+<!--FLEXBOX CONTAINER -->
+<div class="d-flex justify-content-center pb-2">
+<h2 class="pr-2">1 BTC = </h2>
+<h2 id="bitcoinPrice"></h2></h2>
+</div>
+<!--END FLEXBOX CONTAINER -->
+
+<!--FLEXBOX CONTAINER -->
+<div class="d-flex justify-content-center pb-3">
+<h3 class="mr-2 mb-0">BITCOIN IS</h3>
+<h3 class="mr-2 mb-0" id="upDown">UP</h3>
+<h3 class="mr-2 mb-0" id="percentOfChange">2.34%</h3>
+<h3>FROM YESTERDAY.</h3>
+</div>
+
+<div class="d-flex justify-content-center pb-3">
+  <button type="button" class="btn btn-primary m-1" id="dayButton">Day</button>
+  <button type="button" class="btn btn-primary m-1" id="weekButton">Week</button>
+  <button type="button" class="btn btn-primary m-1" id="monthButton">Month</button>
+</div>
+
+
+
+<h1 class="text-center font-weight-bold py-3">SHOULD'VE BOUGHT DOGECOIN</h3>
+
+<div class='d-flex justify-content-center'>
+<img class="img-fluid" src='img/dogecoin.png'>
+</div>
+
+<footer class="footer">
+        <p class="text-muted text-center my-0">Donate :) - bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq</span>
+    </footer>
+
+<!--END FLEXBOX CONTAINER -->
+<script>
+var weekButton = document.getElementById('weekButton');
+weekButton.addEventListener('click', function() {
+  weekButton.textContent = 'FUCK';
+});
+//Get header where we will place bitcoin price
+const priceHeader = document.getElementById('bitcoinPrice');
+const url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
+const url2 = 'https://api.coindesk.com/v1/bpi/historical/close.json';
+
+var btcPriceToday, btcPriceYesterday;
+
+var yesterdayDate = getYesterdaysDate();
+console.log(yesterdayDate);
+
+var promise1 = fetch(url)
+  .then((response) => response.json())
+  .then(function(data) {
+      btcPriceToday = data['bpi']['USD']['rate'];
+      btcPriceToday = btcPriceToday.replace(',', '');
+      btcPriceToday = parseFloat(parseFloat(parseFloat(btcPriceToday)).toFixed(2));
+      priceHeader.textContent = ' $' + btcPriceToday;
+    })
+
+var promise2 = fetch(url2)
+  .then((response) => response.json())
+  .then(function(data) {
+      btcPriceYesterday = data['bpi'][yesterdayDate];
+      console.log("Promise 2 " + promise2);
+    })
+
+      Promise.all([promise1, promise2]).then(function(values) {
+        console.log('All promises resolved');
+        console.log('btcPriceToday = ' + btcPriceToday + ' ' + typeof(btcPriceToday));
+        console.log('btcPriceYesterday = ' + btcPriceYesterday + ' ' + typeof(btcPriceYesterday));
+
+        var difference = btcPriceToday - btcPriceYesterday;
+        var percentOfChange = difference / btcPriceYesterday * 100;
+
+        if (percentOfChange > 0) {
+          document.getElementById('percentOfChange').style.color = 'green';
+          document.getElementById('upDown').textContent = 'UP';
+        }
+        else {
+          document.getElementById('percentOfChange').style.color = 'red';
+          document.getElementById('upDown').textContent = 'DOWN';
+        }
+
+        document.getElementById('percentOfChange').textContent = percentOfChange.toFixed(2) + "%";
+      });
+
+  function getYesterdaysDate() {
+    var yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 2);
+    yesterdayDate = JSON.stringify(yesterdayDate);
+    yesterdayDate = yesterdayDate.slice(1, 11);
+
+    return yesterdayDate;
+  }
+
+  function getLastWeeksDate() {
+    var lastWeekDate = new Date();
+    lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+    lastWeekDate = JSON.stringify(lastWeekDate);
+    lastWeekDate = lastWeekDate.slice(1, 11);
+
+    return lastWeekDate;
+  }
+
+  function getLastMonthsDate() {
+    var lastMonthDate = new Date();
+    lastMonthDate.setDate(lastMonthDate.getMonth() - 1);
+    lastMonthDate = JSON.stringify(lastMonthDate);
+    lastMonthDate = lastMonthDate.slice(1, 11);
+
+    return lastMonthDate;
+  }
+
+</script>
+</body>
+</html>
