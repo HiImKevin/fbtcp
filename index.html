@@ -25,7 +25,7 @@
 <h3 class="mr-2 mb-0">BITCOIN IS</h3>
 <h3 class="mr-2 mb-0" id="upDown">UP</h3>
 <h3 class="mr-2 mb-0" id="percentOfChange">2.34%</h3>
-<h3>FROM YESTERDAY.</h3>
+<h3 id="timeFrame">FROM YESTERDAY.</h3>
 </div>
 
 <div class="d-flex justify-content-center pb-3">
@@ -34,8 +34,6 @@
   <button type="button" class="btn btn-primary m-1" id="monthButton">Month</button>
 </div>
 
-
-
 <h1 class="text-center font-weight-bold py-3">SHOULD'VE BOUGHT DOGECOIN</h3>
 
 <div class='d-flex justify-content-center'>
@@ -43,25 +41,37 @@
 </div>
 
 <footer class="footer">
-        <p class="text-muted text-center my-0">Donate :) - bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq</span>
+        <p class="text-muted text-center my-0">Donate :) - 1K3M5hBPrzpSaYCKpqnijnosqyncwpfXjg</span>
     </footer>
 
 <!--END FLEXBOX CONTAINER -->
 <script>
+var dayButton = document.getElementById('dayButton');
 var weekButton = document.getElementById('weekButton');
-weekButton.addEventListener('click', function() {
-  weekButton.textContent = 'FUCK';
-});
+var monthButton = document.getElementById('monthButton');
+
+dayButton.addEventListener('click', calculateYesterday);
+weekButton.addEventListener('click', calculateWeekAgo);
+monthButton.addEventListener('click', calculateMonthAgo);
+
 //Get header where we will place bitcoin price
 const priceHeader = document.getElementById('bitcoinPrice');
 const url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
 const url2 = 'https://api.coindesk.com/v1/bpi/historical/close.json';
 
-var btcPriceToday, btcPriceYesterday;
+var btcPriceToday, btcPriceYesterday, btcPriceWeekAgo, btcPriceMonthAgo;
 
 var yesterdayDate = getYesterdaysDate();
-console.log(yesterdayDate);
+var lastWeekDate = getLastWeeksDate();
+var lastMonthDate = getLastMonthsDate();
 
+console.log(yesterdayDate);
+console.log(lastWeekDate);
+console.log(lastMonthDate);
+
+
+
+//API call to retrieve btcPriceToday
 var promise1 = fetch(url)
   .then((response) => response.json())
   .then(function(data) {
@@ -71,11 +81,17 @@ var promise1 = fetch(url)
       priceHeader.textContent = ' $' + btcPriceToday;
     })
 
+//API call to retrieve historical btc price for yesterday, one week ago, one month ago
 var promise2 = fetch(url2)
   .then((response) => response.json())
   .then(function(data) {
       btcPriceYesterday = data['bpi'][yesterdayDate];
+      btcPriceWeekAgo = data['bpi'][lastWeekDate];
+      btcPriceMonthAgo = data['bpi'][lastMonthDate];
       console.log("Promise 2 " + promise2);
+      console.log("BTC price on " + getYesterdaysDate() + " = " + btcPriceYesterday);
+      console.log("BTC price on " + getLastWeeksDate() + " = " + btcPriceWeekAgo);
+      console.log("BTC price on " + getLastMonthsDate() + " = " + btcPriceMonthAgo);
     })
 
       Promise.all([promise1, promise2]).then(function(values) {
@@ -83,24 +99,14 @@ var promise2 = fetch(url2)
         console.log('btcPriceToday = ' + btcPriceToday + ' ' + typeof(btcPriceToday));
         console.log('btcPriceYesterday = ' + btcPriceYesterday + ' ' + typeof(btcPriceYesterday));
 
-        var difference = btcPriceToday - btcPriceYesterday;
-        var percentOfChange = difference / btcPriceYesterday * 100;
-
-        if (percentOfChange > 0) {
-          document.getElementById('percentOfChange').style.color = 'green';
-          document.getElementById('upDown').textContent = 'UP';
-        }
-        else {
-          document.getElementById('percentOfChange').style.color = 'red';
-          document.getElementById('upDown').textContent = 'DOWN';
-        }
-
-        document.getElementById('percentOfChange').textContent = percentOfChange.toFixed(2) + "%";
+        calculateYesterday();
       });
+
+//TODO - Functions repetitive - fix
 
   function getYesterdaysDate() {
     var yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 2);
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
     yesterdayDate = JSON.stringify(yesterdayDate);
     yesterdayDate = yesterdayDate.slice(1, 11);
 
@@ -109,7 +115,7 @@ var promise2 = fetch(url2)
 
   function getLastWeeksDate() {
     var lastWeekDate = new Date();
-    lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+    lastWeekDate.setDate(lastWeekDate.getDate() - 8);
     lastWeekDate = JSON.stringify(lastWeekDate);
     lastWeekDate = lastWeekDate.slice(1, 11);
 
@@ -118,11 +124,62 @@ var promise2 = fetch(url2)
 
   function getLastMonthsDate() {
     var lastMonthDate = new Date();
-    lastMonthDate.setDate(lastMonthDate.getMonth() - 1);
+    lastMonthDate.setDate(lastMonthDate.getDate());
+    lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
     lastMonthDate = JSON.stringify(lastMonthDate);
     lastMonthDate = lastMonthDate.slice(1, 11);
 
     return lastMonthDate;
+  }
+
+  function calculateYesterday() {
+    var difference = btcPriceToday - btcPriceYesterday;
+    var percentOfChange = difference / btcPriceYesterday * 100;
+
+    if (percentOfChange > 0) {
+      document.getElementById('percentOfChange').style.color = 'green';
+      document.getElementById('upDown').textContent = 'UP';
+    }
+    else {
+      document.getElementById('percentOfChange').style.color = 'red';
+      document.getElementById('upDown').textContent = 'DOWN';
+    }
+    document.getElementById('timeFrame').textContent = "FROM YESTERDAY."
+    document.getElementById('percentOfChange').textContent = percentOfChange.toFixed(2) + "%";
+  }
+
+  function calculateWeekAgo() {
+    var difference = btcPriceToday - btcPriceWeekAgo;
+    var percentOfChange = difference / btcPriceWeekAgo * 100;
+
+    if (percentOfChange > 0) {
+      document.getElementById('percentOfChange').style.color = 'green';
+      document.getElementById('upDown').textContent = 'UP';
+    }
+    else {
+      document.getElementById('percentOfChange').style.color = 'red';
+      document.getElementById('upDown').textContent = 'DOWN';
+    }
+
+    document.getElementById('timeFrame').textContent = "FROM A WEEK AGO."
+    document.getElementById('percentOfChange').textContent = percentOfChange.toFixed(2) + "%";
+  }
+
+  function calculateMonthAgo() {
+    var difference = btcPriceToday - btcPriceMonthAgo;
+    var percentOfChange = difference / btcPriceMonthAgo * 100;
+
+    if (percentOfChange > 0) {
+      document.getElementById('percentOfChange').style.color = 'green';
+      document.getElementById('upDown').textContent = 'UP';
+    }
+    else {
+      document.getElementById('percentOfChange').style.color = 'red';
+      document.getElementById('upDown').textContent = 'DOWN';
+    }
+
+    document.getElementById('timeFrame').textContent = "FROM A MONTH AGO."
+    document.getElementById('percentOfChange').textContent = percentOfChange.toFixed(2) + "%";
   }
 
 </script>
